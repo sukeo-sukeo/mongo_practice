@@ -7,12 +7,4 @@ const TodoListShema = mongoose.model('TodoList', {
   limitDate: String
  })
 
-const WeponShema = mongoose.model('Wepons', {
-  name:  String,
-  descript: String,
-  atk: Number,
-  price: Number,
-  addDate: String,
- })
-
-module.exports = {TodoListShema, WeponShema}
+module.exports = TodoListShema

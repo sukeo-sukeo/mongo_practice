@@ -2,8 +2,30 @@ const TopPage = {
   template: '#top-page',
   data: function() {
     return {
-      msg: 'やることを登録'
+      msg: 'ToDo',
+      isActives: [],
+      todos: []
     }
+  },
+  methods: {
+    updBtn: function(key) {
+      this.$set(this.isActives, key, this.isActives[key] = !this.isActives[key])
+      console.log(this.isActives);
+    }
+  },
+  created: function() {
+    axios.get('http://localhost:3000/getdata')
+    .then(res => {
+      console.log(res);
+      this.todos = res.data
+      for (let i = 0; i < res.data.length; i++) {
+        this.isActives.push( Boolean(false) )
+      }
+      console.log(this.isActives);
+    })
+    .catch(err => {
+      console.log(err);
+    })
   }
 }
 
