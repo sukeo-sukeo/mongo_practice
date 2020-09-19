@@ -2,53 +2,142 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="./style.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="./style.css"> -->
   <title>todoリスト</title>
 </head>
 <body>
+
   <div id="app">
     <top-page></top-page>
   </div>
 
-  <script src="https://unpkg.com/vue@2.5.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script src="https://unpkg.com/vue-router@3.0.1"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
   <script type="text/x-template" id="top-page">
-    <div>
-      <h1>{{ msg }}</h1>
-      <form class="form_main" action="http://localhost:3000/" method="post">
-        <input type="text" name="title" placeholder="やること" autocomplete="off"><br>
-        <input type="text" name="descript" placeholder="詳細" autocomplete="off"><br>
-        <input type="text" name="limit" placeholder="いつまでに？" autocomplete="off"><br>
-        <input type="submit" value="やることを登録">
-      </form>
-      <ul v-for="(todo, idx) in todos.slice().reverse()" :key="todo._id">
-        <li>
-          {{ todo.title }} {{ todo.addDate }}
-        </li>
-        <li>
-          {{ todo.descript }}
-        </li>
-        <li>
-          {{ todo.limitDate }}
-        </li>
-        <div class="form_forms">
-          <form class="form_delete" :action="`http://localhost:3000/delete/${todo._id}`" method="post">
-            <input type="submit" name="delete" value="削除する">
-          </form>
-          <button v-on:click.prevent="updBtn(idx)" v-show=!isActives[idx]>変更する</button>
-          <form class="form_update" :action="`http://localhost:3000/update/${todo._id}`" method="post" v-show=isActives[idx]>
-            <input type="text" name="title" placeholder="やること" autocomplete="off"><br>
-            <input type="text" name="descript" placeholder="詳細" autocomplete="off"><br>
-            <input type="text" name="limit" placeholder="いつまでに？" autocomplete="off">
-            <input type="submit" name="update" value="変更する">
-          </form>
-        </div>
-      </ul>
-    </div>
+    <v-app>
+      <v-app-bar app flat dark>
+        <v-btn fab text small @click="drawer = !drawer">
+          <v-icon>mdi-view-headline</v-icon>
+        </v-btn>
+        <v-toolbar-title class="text-uppercase display-2">
+          <span class="font-weight-light">{{ msg }}</span>
+          <span>list</span>
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn text color="grey" class="text--lighten-2">
+          <span>サインアウト</span>
+          <v-icon right>mdi-exit-to-app</v-icon>
+        </v-btn>
+      </v-app-bar>
+
+      <v-navigation-drawer app v-model="drawer" class="purple">
+        <p>test</p>
+      </v-navigation-drawer>
+
+      <v-main>
+
+        <v-card flat class="mt-13 px-16">
+          <v-card-title>
+            <p>{{ msg2 }}</p>
+          </v-card-title>
+          <v-form>
+            <v-container tag="div">
+              <v-row>
+                <v-text-field prepend-icon="mdi-draw" label="新しいタスク" v-model="todoData.title" autocomplete="off"/>
+              </v-row>
+              <v-row>
+                <v-col cols="12" sm="7">
+                  <v-textarea rows=1 prepend-icon="mdi-file-document-edit-outline" label="詳細" v-model="todoData.descript" autocomplete="off"/>
+                </v-col>
+                <v-col cols="9" sm="3">
+                  <v-text-field prepend-icon="mdi-calendar-check" label="期限を設ける" v-model="todoData.limit" autocomplete="off" @click="calendar = !calendar"/>
+                  <v-dialog width="300" v-model="calendar">
+                    <v-date-picker v-model="todoData.limit" @click:date="calendar = false"/>
+                  </v-dialog>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn dark depressed color="success" @click="addTodo">
+                    <v-icon left>mdi-database-import</v-icon>
+                    <span class="font-weight-bold">保存</span>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card>
+
+        <v-container>
+          <v-row justify="center">
+            <v-col cols="5"  v-for="(todo, idx) in todos" :key="todo._id">
+              <v-card outlined hover>
+                <v-card-title>
+                  {{ todo.title }}
+                </v-card-title>
+                <v-card-subtitle>
+                  詳細<br>{{ todo.descript }}
+                </v-card-subtitle>
+                <v-card-text>
+                  期限<br>{{ todo.limitDate }}
+                </v-card-text>
+
+                <v-card-actions style="float: right;">
+                  <v-btn @click="deleteTodo(todo._id)" dark color="red lighten-1" fab small>
+                    <v-icon>mdi-trash-can</v-icon>
+                  </v-btn>
+                  <v-btn @click.prevent="updBtn(idx)" color="primary lighten-1" fab small>
+                    <v-icon>
+                    {{ isActives[idx] ? 'mdi-close' : 'mdi-circle-edit-outline'}}
+                    </v-icon>
+                  </v-btn>
+                  <v-dialog v-model="isActives[idx]" width="500">
+                    <v-card>
+                      <v-card-title>
+                        <v-text-field v-model="updateTodoData.title"
+                         autocomplete="off"
+                         :label="!todo.title ? 'タスクを入力' : todo.title"
+                        />
+                      </v-card-title>
+                      <v-card-text>
+                        <v-textarea rows=1 v-model="updateTodoData.descript"
+                         autocomplete="off"
+                         :label="!todo.descript ? '詳細を入力' : todo.descript"
+                        />
+                        <v-text-field v-model="updateTodoData.limit"
+                         autocomplete="off"
+                         :label="!todo.limitDate ? '期限を入力' : todo.limitDate"
+                         @click="updateCalendar = true"
+                        />
+                      </v-card-text>
+                      <v-dialog width="300" v-model="updateCalendar">
+                        <v-date-picker v-model="updateTodoData.limit" @click:date="updateCalendar = false"/>
+                      </v-dialog>
+                      <v-card-actions>
+                      <v-row justify="end" class="mr-5 mb-5">
+                        <v-btn @click.prevent="updateTodo(todo._id, idx)" color="success"
+                        class="font-weight-bold">
+                          変更する
+                        </v-btn>
+                      </v-row>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                </v-card-actions>
+
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+
+      </v-main>
+    </v-app>
   </script>
 
   <script src="./main.js"></script>
