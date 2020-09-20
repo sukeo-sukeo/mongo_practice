@@ -6,13 +6,46 @@ const TopPage = {
       isActives: [],
       todos: [],
       rating: 3,
-      ratingComent: {
-        1: 'とりあえずメモ',
-        2: 'あとあと役に立つかも',
-        3: '思いつき',
-        4: '重要',
-        5: '命'
+      ratingComment: {
+        1: {
+          comment: 'とりあえずメモしておこう',
+          style: [
+            'font-weight-bold'
+          ]
+        },
+        2: {
+          comment: 'あとあと役に立つかも',
+          style: [
+            'blue--text',
+            'font-weight-bold'
+          ]
+        },
+        3: {
+          comment: '思いつき',
+          style: [
+            'green--text',
+            'font-weight-bold',
+          ]
+        },
+        4: {
+          comment: '重要',
+          style: [
+            'purple--text',
+            'text--lighten-2',
+            'font-weight-bold',
+          ]
+        },
+        5: {
+          comment: '命',
+          style: [
+            'red--text',
+            'text--darken-2',
+            'font-weight-bold',
+          ]
+        }
       },
+      tagItems: ['仕事', '家族', '友人', '読書', 'ゲーム', 'お酒', 'クリエイティブ'],
+      tags:[],
       changes: {
         calendar: false,
         updateCalendar: false,
@@ -36,7 +69,6 @@ const TopPage = {
       axios.get(this.baseURL + '/getdata')
       .then(res => {
         this.todos = res.data.slice().reverse()
-        console.log(this.todos[0].descript);
       })
       .then(() => {
         this.todoData = {
@@ -62,6 +94,7 @@ const TopPage = {
       axios.post(this.baseURL + '/', this.todoData)
       .then(res => {
         this.changes.addTodoDialog = false
+        console.log(this.rating);
         this.rating = 3
         this.getTodoData()
       })
@@ -94,6 +127,10 @@ const TopPage = {
       if (!this.updateTodoData.title) {this.updateTodoData.title = this.todos[idx].title}
       if (!this.updateTodoData.descript) {this.updateTodoData.descript = this.todos[idx].descript}
       if (!this.updateTodoData.limit) {this.updateTodoData.limit = this.todos[idx].limitDate}
+    },
+    removeTage: function(item) {
+      this.tags.splice(this.tags.indexOf(item), 1)
+      this.tags = [...this.tags]
     }
   },
   created: function() {
