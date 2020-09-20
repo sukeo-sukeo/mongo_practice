@@ -2,16 +2,23 @@ const TopPage = {
   template: '#top-page',
   data: function() {
     return {
-      msg: 'ToDo',
-      msg2: 'やることを登録してください',
       baseURL: 'http://localhost:3000',
       isActives: [],
-      calendar: false,
-      updateCalendar: false,
-      dialog: false,
-      drawer: false,
       todos: [],
-      todosRev: [],
+      rating: 3,
+      ratingComent: {
+        1: 'とりあえずメモ',
+        2: 'あとあと役に立つかも',
+        3: '思いつき',
+        4: '重要',
+        5: '命'
+      },
+      changes: {
+        calendar: false,
+        updateCalendar: false,
+        addTodoDialog: false,
+        drawer: false,
+      },
       todoData: {
         title: '',
         descript: '',
@@ -29,6 +36,9 @@ const TopPage = {
       axios.get(this.baseURL + '/getdata')
       .then(res => {
         this.todos = res.data.slice().reverse()
+        console.log(this.todos[0].descript);
+      })
+      .then(() => {
         this.todoData = {
           title: '',
           descript: '',
@@ -51,7 +61,8 @@ const TopPage = {
     addTodo: function() {
       axios.post(this.baseURL + '/', this.todoData)
       .then(res => {
-        this.msg2 = `todoを追加しました！`
+        this.changes.addTodoDialog = false
+        this.rating = 3
         this.getTodoData()
       })
       .catch(err => {
@@ -61,7 +72,7 @@ const TopPage = {
     deleteTodo: function(id) {
       axios.post(this.baseURL + '/delete' + `/${id}`)
       .then(res => {
-        this.msg2 = `todoを削除しました！`
+        console.log(res);
         this.getTodoData()
       })
       .catch(err => {
@@ -72,7 +83,6 @@ const TopPage = {
       this.updateTodoSpaceCheck(idx)
       axios.post(this.baseURL + '/update' + `/${id}`, this.updateTodoData)
       .then(res => {
-        this.msg2 = `todoを更新しました！`
         this.getTodoData()
         this.updBtn(idx)
       })
