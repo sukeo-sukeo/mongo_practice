@@ -4,8 +4,8 @@ const bodyParser = require('body-parser')
 const port = 3000
 
 const db = require('./src/database')
-const Todo = require('./src/model')
-const {find, add, eras, update} = require('./src/control')
+const {TodoListShema: Todo, ArchiveShema: Archive} = require('./src/model')
+const {add, eras, update} = require('./src/control')
 
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
@@ -16,14 +16,17 @@ app.post('/', (req, res) => {
     title: req.body.title,
     descript: req.body.descript,
     addDate: new Date(),
-    limitDate: req.body.limit
+    limitDate: req.body.limit,
+    rating: req.body.rating,
+    comment: req.body.comment,
+    tags: req.body.tags
   })
   add(Todo, todoData)
   res.redirect('/')
 })
 
 app.post('/delete/:id', (req, res) => {
-  eras(Todo, req.params.id)
+  eras(Archive, req.params.id)
   res.redirect('/')
 })
 
@@ -32,13 +35,45 @@ app.post('/update/:id', (req, res) => {
   res.redirect('/')
 })
 
+app.post('/archive/:id', (req, res) => {
+  Todo.find({_id: req.params.id}, (err, docs) => {
+    console.log(docs)
+    //archive.collectionへ追加
+    add(Archive, docs)
+    //todolists.collectionのデータを削除
+    eras(Todo, req.params.id)
+    res.redirect('/')
+  })
+})
+
+app.post('/list/:id', (req, res) => {
+   Archive.find({_id: req.params.id}, (err, docs) => {
+    console.log(docs)
+    //archive.collectionへ追加
+    add(Todo, docs)
+    //todolists.collectionのデータを削除
+    eras(Archive, req.params.id)
+    res.redirect('/')
+  })
+})
+
 app.get('/getdata', (req, res) => {
   console.log('getきた');
-  find('todolists', '', (err, docs) => {
-    console.log(docs);
+  Todo.find({}, (err, docs) => {
+    console.log(docs)
     res.send(docs)
   })
 })
+
+app.get('/getarchivedata', (req, res) => {
+  console.log('archiveきた');
+  Archive.find({}, (err, docs) => {
+    console.log(docs)
+    res.send(docs)
+  })
+})
+
+
 
 
 app.listen(port, () => {
